@@ -9,6 +9,10 @@ from dotenv import load_dotenv
 # .env 파일 로드
 load_dotenv()
 
+# API 키 리스트
+API_KEYS = os.getenv("DEEPL_API_KEYS").split(",")
+using_key_index = 0  # 현재 사용 중인 API 키 인덱스
+
 def extract_audio(mp4_file, audio_file):
     """MP4 파일에서 오디오 추출"""
     print(f"오디오 추출 시작: {mp4_file}")
@@ -31,22 +35,29 @@ def audio_to_srt(audio_file, srt_file):
             f_srt.write(f"{i}\n{start} --> {end}\n{text}\n\n") 
 
 def translate_text(text):
-    """DeepL API를 사용하여 텍스트를 한국어로 번역"""
+    """DeepL API를 사용하여 텍스트를 한국어로 번역 (순차적 API 키 사용)"""
+    global using_key_index
     API_URL = "https://api-free.deepl.com/v2/translate"
-    API_KEY = os.getenv("DEEPL_API_KEY")
-    params = {
-        "auth_key": API_KEY,
-        "text": text,
-        "target_lang": "KO"  # 한국어 번역
-    }
-    response = requests.post(API_URL, data=params)
     
-    if response.status_code == 200:
-        return response.json()["translations"][0]["text"]
-    else:
-        print(f"번역 실패: {response.status_code} - {response.text}")
-        sys.exit(1)
+    while using_key_index < len(API_KEYS):
+        api_key = API_KEYS[using_key_index]
+        params = {
+            "auth_key": api_key,
+            "text": text,
+            "target_lang": "KO"  # 한국어 번역
+        }
+        response = requests.post(API_URL, data=params)
+        
+        if response.status_code == 200:
+            return response.json()["translations"][0]["text"]
+        else:
+            using_key_index += 1  # 실패하면 다음 키 사용
+            print(f"번역 실패: {response.status_code} - {response.text}, 다음 API 키 사용 {using_key_index}")
     
+    print("모든 API 키 사용 실패")
+    sys.exit(1)
+    
+
 def srt_to_translated_srt(srt_file, translated_srt_file):
     """SRT 파일을 읽어 한국어 번역본 생성"""
     print(f"한글 번역 시작: {srt_file}")
