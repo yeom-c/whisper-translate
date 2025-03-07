@@ -4,6 +4,10 @@ import os
 import sys
 import time
 import requests
+from dotenv import load_dotenv
+
+# .env 파일 로드
+load_dotenv()
 
 def extract_audio(mp4_file, audio_file):
     """MP4 파일에서 오디오 추출"""
@@ -29,7 +33,7 @@ def audio_to_srt(audio_file, srt_file):
 def translate_text(text):
     """DeepL API를 사용하여 텍스트를 한국어로 번역"""
     API_URL = "https://api-free.deepl.com/v2/translate"
-    API_KEY = "YOUR_DEEPL_API_KEY"  # 여기에 DeepL API 키를 입력하세요.
+    API_KEY = os.getenv("DEEPL_API_KEY")
     params = {
         "auth_key": API_KEY,
         "text": text,
