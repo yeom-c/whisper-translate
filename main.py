@@ -44,7 +44,8 @@ def translate_text(text):
     if response.status_code == 200:
         return response.json()["translations"][0]["text"]
     else:
-        return "번역 오류"
+        print(f"번역 실패: {response.status_code} - {response.text}")
+        sys.exit(1)
     
 def srt_to_translated_srt(srt_file, translated_srt_file):
     """SRT 파일을 읽어 한국어 번역본 생성"""
