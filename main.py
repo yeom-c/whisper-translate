@@ -51,8 +51,10 @@ def translate_text(text):
         if response.status_code == 200:
             return response.json()["translations"][0]["text"]
         else:
+            print(f"번역 실패: {response.status_code} - {response.text}, API 키 인덱스 {using_key_index}")
             using_key_index += 1  # 실패하면 다음 키 사용
-            print(f"번역 실패: {response.status_code} - {response.text}, 다음 API 키 사용 {using_key_index}")
+            print(f"번역 계속, API 키 인덱스 {using_key_index}")
+
     
     print("모든 API 키 사용 실패")
     sys.exit(1)
